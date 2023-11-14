@@ -3,7 +3,6 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  ManyToOne,
   CreateDateColumn,
   OneToMany,
 } from 'typeorm';
@@ -22,7 +21,7 @@ export class User {
   @Column({ type: 'varchar' })
   password_hash: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   refresh_token: string;
 
   @CreateDateColumn({

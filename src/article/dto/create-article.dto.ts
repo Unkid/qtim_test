@@ -13,6 +13,6 @@ export class CreateArticleDto {
   @IsEnum(ArticleCategory)
   category?: ArticleCategory;
 
-  //   @IsString()
-  //   author: string;
+  @IsString()
+  author?: number;
 }

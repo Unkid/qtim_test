@@ -1,34 +1,63 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Article } from './entities/article.entity';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { UserService } from 'src/auth/user.service';
 
 @Injectable()
 export class ArticleService {
   constructor(
     @InjectRepository(Article)
     private articleRepository: Repository<Article>,
+    private userService: UserService,
   ) {}
 
-  async create(createArticleDto: CreateArticleDto): Promise<Article> {
+  async create(createArticleDto: CreateArticleDto): Promise<any> {
     console.log('This action adds a new article');
     const article = new Article();
     article.title = createArticleDto.title;
     article.body = createArticleDto.body;
     if (createArticleDto.category) article.category = createArticleDto.category;
-    return this.articleRepository.save(article);
+    const user = await this.userService.findById(createArticleDto.author);
+    if (!user) throw new ForbiddenException('');
+    article.author = user;
+    await this.articleRepository.save(article);
+    return { ...article, author: { username: user.username } };
   }
 
-  findAll() {
+  findAll(): Promise<Article[]> {
     console.log(`This action returns all article`);
-    return this.articleRepository.find();
+    return this.articleRepository.find({
+      select: {
+        author: {
+          username: true,
+        },
+      },
+      relations: {
+        author: true,
+      },
+    });
   }
 
   async findOne(id: number): Promise<Article> {
     console.log(`This action returns a #${id} article`);
-    const article = await this.articleRepository.findOneBy({ id });
+    const article = await this.articleRepository.findOne({
+      where: { id },
+      select: {
+        author: {
+          username: true,
+        },
+      },
+      relations: {
+        author: true,
+      },
+    });
     if (!article) throw new NotFoundException('');
     return article;
   }

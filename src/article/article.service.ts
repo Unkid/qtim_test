@@ -9,7 +9,7 @@ import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 export class ArticleService {
   constructor(
     @InjectRepository(Article)
-    private articlesRepository: Repository<Article>,
+    private articleRepository: Repository<Article>,
   ) {}
 
   async create(createArticleDto: CreateArticleDto): Promise<Article> {
@@ -18,17 +18,17 @@ export class ArticleService {
     article.title = createArticleDto.title;
     article.body = createArticleDto.body;
     if (createArticleDto.category) article.category = createArticleDto.category;
-    return this.articlesRepository.save(article);
+    return this.articleRepository.save(article);
   }
 
   findAll() {
     console.log(`This action returns all article`);
-    return this.articlesRepository.find();
+    return this.articleRepository.find();
   }
 
   async findOne(id: number): Promise<Article> {
     console.log(`This action returns a #${id} article`);
-    const article = await this.articlesRepository.findOneBy({ id });
+    const article = await this.articleRepository.findOneBy({ id });
     if (!article) throw new NotFoundException('');
     return article;
   }
@@ -38,19 +38,19 @@ export class ArticleService {
     updateArticleDto: UpdateArticleDto,
   ): Promise<UpdateResult> {
     console.log(`This action updates a #${id} article`);
-    const article = await this.articlesRepository.findOneBy({
+    const article = await this.articleRepository.findOneBy({
       id,
     });
     if (!article) throw new NotFoundException('');
-    return this.articlesRepository.update(id, updateArticleDto);
+    return this.articleRepository.update(id, updateArticleDto);
   }
 
   async remove(id: number): Promise<DeleteResult> {
     console.log(`This action removes a #${id} article`);
-    const article = await this.articlesRepository.findOneBy({
+    const article = await this.articleRepository.findOneBy({
       id,
     });
     if (!article) throw new NotFoundException('');
-    return this.articlesRepository.delete(id);
+    return this.articleRepository.delete(id);
   }
 }

@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getPgConfig } from './configs/postgres.config';
 import { ArticleModule } from './article/article.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ArticleModule } from './article/article.module';
       useFactory: getPgConfig,
     }),
     ArticleModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],

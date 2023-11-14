@@ -1,3 +1,4 @@
+import { User } from 'src/auth/entities/user.entity';
 import {
   Entity,
   Column,
@@ -39,6 +40,6 @@ export class Article {
     default: () => 'CURRENT_TIMESTAMP(6)',
   })
   public created_at: Date;
-  //   @ManyToOne((type) => User, (user) => user.articles)
-  //   author: User;
+  @ManyToOne(() => User, (user) => user.articles)
+  author: User;
 }

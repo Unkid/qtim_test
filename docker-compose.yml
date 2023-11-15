@@ -1,0 +1,34 @@
+version: '3.9'
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres:14.8-alpine3.18
+    environment:
+      POSTGRES_DB: 'qtim'
+      POSTGRES_USER: 'admin'
+      POSTGRES_PASSWORD: 'qtimtest'
+      PGDATA: '/var/lib/postgresql/data/pgdata'
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qtim-test
+    environment:
+      POSTGRES_DB: 'qtim'
+      POSTGRES_USERNAME: 'admin'
+      POSTGRES_PASSWORD: 'qtimtest'
+      POSTGRES_HOST: 'postgres'
+      POSTGRES_PORT: '5432'
+      JWT_ACCESS_SECRET: 'accessssecret'
+      JWT_REFRESH_SECRET: 'refreshsecret'
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+    volumes:
+      - ./src:/app/src

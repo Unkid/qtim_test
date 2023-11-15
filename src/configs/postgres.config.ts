@@ -8,8 +8,8 @@ export const getPgConfig = async (
 ): Promise<TypeOrmModuleOptions> => {
   return {
     type: 'postgres',
-    host: 'localhost',
-    port: 5432,
+    host: configService.get('POSTGRES_HOST'),
+    port: configService.get('POSTGRES_PORT'),
     password: configService.get('POSTGRES_PASSWORD'),
     username: configService.get('POSTGRES_USERNAME'),
     entities: [Article, User],

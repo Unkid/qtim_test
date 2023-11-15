@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -10,6 +11,13 @@ import { ConfigService } from '@nestjs/config';
 import { SignUpDto } from './dto/sign-up.dto';
 import { compare, genSalt, hash } from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
+import {
+  FORBIDDEN_ACTION,
+  NOT_FOUND_EMAIL,
+  NOT_FOUND_ID,
+  UNAUTHORIZED,
+  USER_EXISTS,
+} from './auth.consts';
 
 @Injectable()
 export class AuthService {
@@ -53,7 +61,7 @@ export class AuthService {
 
   async singUp(signUpDto: SignUpDto) {
     const userExists = await this.userService.findByEmail(signUpDto.email);
-    if (userExists) throw new BadRequestException('');
+    if (userExists) throw new BadRequestException(USER_EXISTS);
 
     const passwordHash = await this.hashData(signUpDto.password);
     const user = await this.userService.create({
@@ -68,13 +76,13 @@ export class AuthService {
 
   async login(signInDto: LoginDto) {
     const user = await this.userService.findByEmail(signInDto.email);
-    if (!user) throw new NotFoundException('');
+    if (!user) throw new NotFoundException(NOT_FOUND_EMAIL);
 
     const correctPassword = await compare(
       signInDto.password,
       user['password_hash'],
     );
-    if (!correctPassword) throw new UnauthorizedException('');
+    if (!correctPassword) throw new UnauthorizedException(UNAUTHORIZED);
 
     const tokens = await this.getTokens(user.id);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
@@ -83,13 +91,18 @@ export class AuthService {
 
   async refreshTokens(id: number, token: string) {
     const user = await this.userService.findById(id);
-    if (!user) throw new NotFoundException('');
+    if (!user || !user.refresh_token)
+      throw new ForbiddenException(FORBIDDEN_ACTION);
 
     const correctToken = await compare(token, user['refresh_token']);
-    if (!correctToken) throw new UnauthorizedException('');
+    if (!correctToken) throw new UnauthorizedException(UNAUTHORIZED);
 
     const tokens = await this.getTokens(id);
     await this.updateRefreshToken(id, tokens.refreshToken);
     return tokens;
+  }
+
+  async logout(id: number) {
+    this.userService.updateRefreshToken(id, null);
   }
 }

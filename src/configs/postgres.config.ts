@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { Article } from 'src/article/entities/article.entity';
-import { User } from 'src/auth/entities/user.entity';
+import { Article } from '../article/entities/article.entity';
+import { User } from '../auth/entities/user.entity';
 
 export const getPgConfig = async (
   configService: ConfigService,
@@ -15,7 +15,7 @@ export const getPgConfig = async (
     entities: [Article, User],
     database: configService.get('POSTGRES_DB'),
     synchronize: true,
-    logging: true,
+    logging: false,
     autoLoadEntities: true,
   };
 };

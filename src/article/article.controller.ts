@@ -8,28 +8,39 @@ import {
   Delete,
   Req,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
+  Query,
 } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { Request } from 'express';
-import { AccessTokenGuard } from 'src/guards/access.guard';
+import { AccessTokenGuard } from '../guards/access.guard';
 
 @Controller('article')
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
   @UseGuards(AccessTokenGuard)
+  @UsePipes(new ValidationPipe())
   @Post()
   create(@Body() createArticleDto: CreateArticleDto, @Req() req: Request) {
     const author = req.user['key'];
-    console.log(req.body);
     return this.articleService.create({ ...createArticleDto, author });
   }
 
   @Get()
-  findAll() {
-    return this.articleService.findAll();
+  async findAll(
+    @Query('limit') limit: number,
+    @Query('offset') offset: number,
+  ) {
+    const articles = await this.articleService.findAll(limit, offset);
+    return {
+      articles: articles[0],
+      count: articles[0].length,
+      totalCount: articles[1],
+    };
   }
 
   @Get(':id')
@@ -39,7 +50,10 @@ export class ArticleController {
 
   @UseGuards(AccessTokenGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateArticleDto: UpdateArticleDto,
+  ) {
     return this.articleService.update(+id, updateArticleDto);
   }
 

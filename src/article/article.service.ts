@@ -7,8 +7,9 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Article } from './entities/article.entity';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
-import { UserService } from 'src/auth/user.service';
+import { Repository } from 'typeorm';
+import { UserService } from '../auth/user.service';
+import { FORBIDDEN_ACTION, NOT_FOUND } from './article.consts';
 
 @Injectable()
 export class ArticleService {
@@ -19,21 +20,22 @@ export class ArticleService {
   ) {}
 
   async create(createArticleDto: CreateArticleDto): Promise<any> {
-    console.log('This action adds a new article');
     const article = new Article();
     article.title = createArticleDto.title;
     article.body = createArticleDto.body;
     if (createArticleDto.category) article.category = createArticleDto.category;
     const user = await this.userService.findById(createArticleDto.author);
-    if (!user) throw new ForbiddenException('');
+    if (!user) throw new ForbiddenException(FORBIDDEN_ACTION);
     article.author = user;
     await this.articleRepository.save(article);
     return { ...article, author: { username: user.username } };
   }
 
-  findAll(): Promise<Article[]> {
-    console.log(`This action returns all article`);
-    return this.articleRepository.find({
+  findAll(
+    limit: number = 10,
+    offset: number = 0,
+  ): Promise<[Article[], number]> {
+    return this.articleRepository.findAndCount({
       select: {
         author: {
           username: true,
@@ -42,11 +44,15 @@ export class ArticleService {
       relations: {
         author: true,
       },
+      order: {
+        created_at: 'DESC',
+      },
+      skip: offset,
+      take: limit,
     });
   }
 
   async findOne(id: number): Promise<Article> {
-    console.log(`This action returns a #${id} article`);
     const article = await this.articleRepository.findOne({
       where: { id },
       select: {
@@ -58,28 +64,23 @@ export class ArticleService {
         author: true,
       },
     });
-    if (!article) throw new NotFoundException('');
+    if (!article) throw new NotFoundException(NOT_FOUND);
     return article;
   }
 
-  async update(
-    id: number,
-    updateArticleDto: UpdateArticleDto,
-  ): Promise<UpdateResult> {
-    console.log(`This action updates a #${id} article`);
+  async update(id: number, updateArticleDto: UpdateArticleDto) {
     const article = await this.articleRepository.findOneBy({
       id,
     });
-    if (!article) throw new NotFoundException('');
-    return this.articleRepository.update(id, updateArticleDto);
+    if (!article) throw new NotFoundException(NOT_FOUND);
+    this.articleRepository.update(id, updateArticleDto);
   }
 
-  async remove(id: number): Promise<DeleteResult> {
-    console.log(`This action removes a #${id} article`);
+  async remove(id: number) {
     const article = await this.articleRepository.findOneBy({
       id,
     });
-    if (!article) throw new NotFoundException('');
-    return this.articleRepository.delete(id);
+    if (!article) throw new NotFoundException(NOT_FOUND);
+    this.articleRepository.delete(id);
   }
 }

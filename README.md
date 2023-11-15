@@ -25,6 +25,7 @@ NestJS, Typescript, TypeOrm, PostgreSQL
 
 **POST**
 **/api/v1/auth/signup**
+
 Все поля обязательны, тело запроса:
 
 ```
@@ -48,6 +49,7 @@ NestJS, Typescript, TypeOrm, PostgreSQL
 
 **POST**
 **/api/v1/auth/login**
+
 Все поля обязательны, тело запроса:
 
 ```
@@ -70,6 +72,7 @@ NestJS, Typescript, TypeOrm, PostgreSQL
 
 **GET**
 **/api/v1/auth/refresh**
+
 Доступен только при авторизации с refresh token
 
 Ответ:
@@ -85,6 +88,7 @@ NestJS, Typescript, TypeOrm, PostgreSQL
 
 **GET**
 **/api/v1/auth/logout**
+
 Доступен только при авторизации с access token
 
 Ответ: код 200 если все успешно
@@ -95,6 +99,7 @@ NestJS, Typescript, TypeOrm, PostgreSQL
 
 **POST**
 **/api/v1/article**
+
 Доступен только с access token
 Тело запроса:
 
@@ -127,6 +132,7 @@ NestJS, Typescript, TypeOrm, PostgreSQL
 
 **GET**
 **/api/v1/article?limit=1&offset=0**
+
 Параметры limit и offset необязательны, по умолчанию выставлены значения 10 и 0 соответственно
 Ответ:
 
@@ -147,6 +153,7 @@ NestJS, Typescript, TypeOrm, PostgreSQL
 
 **GET**
 **/api/v1/article/:id**
+
 Ответ:
 
 ```
@@ -164,6 +171,7 @@ NestJS, Typescript, TypeOrm, PostgreSQL
 
 **PATCH**
 **/api/v1/article/:id**
+
 Доступен только с access token. Для изменения доступны только поля title, body и category
 Тело запроса:
 
@@ -179,5 +187,6 @@ NestJS, Typescript, TypeOrm, PostgreSQL
 
 **DELETE**
 **/api/v1/article/:id**
+
 Доступен только с access token.
 Ответ: код 200 если все прошло успешно.
